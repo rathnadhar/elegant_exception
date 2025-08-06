@@ -1,7 +1,7 @@
 //
 //                   Shree Matraye Namaha
 //                   --------------------
-// general_exception - C++ General Exception Class Library
+// generic_exception - C++ Generic Exception Class Library
 //
 // Copyright (c) 2025 Rathnadhar K V (Rathnadhar Research RR-->)
 //
@@ -78,10 +78,10 @@ inline static auto limit_exception_message = [](const std::string_view in_except
 
 //Defining the class template so as to remove the location information during the release build
 template<typename Tag>
-class general_exception_base;
+class generic_exception_base;
 
 template<>
-class general_exception_base<ReleaseBuildTag>
+class generic_exception_base<ReleaseBuildTag>
 {
     protected:
         inline static constexpr std::string_view format_template = "Exception: error_code: {}, error_message: {}";
@@ -90,24 +90,24 @@ class general_exception_base<ReleaseBuildTag>
         ExceptionMessage exception_message{};
 
     public:
-        general_exception_base() = default;
+        generic_exception_base() = default;
 
-        general_exception_base(ExceptionID in_exception_id)
+        generic_exception_base(ExceptionID in_exception_id)
                                : exception_id{in_exception_id} {}
 
-        general_exception_base(const ExceptionMessage& in_exception_msg)
+        generic_exception_base(const ExceptionMessage& in_exception_msg)
                               : exception_message{limit_exception_message(in_exception_msg)} {}
 
-        general_exception_base(ExceptionMessageView in_exception_msg)
+        generic_exception_base(ExceptionMessageView in_exception_msg)
                               : exception_message{limit_exception_message(in_exception_msg)} {}
 
-        general_exception_base(ExceptionID             in_exception_id,
+        generic_exception_base(ExceptionID             in_exception_id,
                                const ExceptionMessage& in_exception_msg
                               )
                               : exception_id{in_exception_id},
                               exception_message{limit_exception_message(in_exception_msg)} {}
 
-        general_exception_base(ExceptionID          in_exception_id,
+        generic_exception_base(ExceptionID          in_exception_id,
                                ExceptionMessageView in_exception_msg
                               )
                               : exception_id{in_exception_id},
@@ -134,7 +134,7 @@ class general_exception_base<ReleaseBuildTag>
 
 //Exception for Debug build, this has error location information.
 template<>
-class general_exception_base<DebugBuildTag>
+class generic_exception_base<DebugBuildTag>
 {
     protected:
         inline static constexpr std::string_view format_template   = "Exception: error_code: {}, error_message: {}, {}";
@@ -145,28 +145,28 @@ class general_exception_base<DebugBuildTag>
         ExceptionLocation exception_location;
 
     public:
-        general_exception_base(std::source_location in_exception_location = std::source_location::current())
+        generic_exception_base(std::source_location in_exception_location = std::source_location::current())
                               : exception_location{in_exception_location} {}
 
-        general_exception_base(ExceptionID          in_exception_id,
+        generic_exception_base(ExceptionID          in_exception_id,
                                std::source_location in_exception_location = std::source_location::current()
                               )
                               : exception_id{in_exception_id},
                                 exception_location{in_exception_location} {}
 
-        general_exception_base(const ExceptionMessage& in_exception_msg,
+        generic_exception_base(const ExceptionMessage& in_exception_msg,
                                std::source_location    in_exception_location = std::source_location::current()
                               )
                               : exception_message{limit_exception_message(in_exception_msg)},
                                 exception_location{in_exception_location} {}
 
-        general_exception_base(const ExceptionMessageView in_exception_msg,
+        generic_exception_base(const ExceptionMessageView in_exception_msg,
                                std::source_location       in_exception_location = std::source_location::current()
                               )
                               : exception_message{limit_exception_message(in_exception_msg)},
                                 exception_location{in_exception_location} {}
 
-        general_exception_base(ExceptionID             in_exception_id,
+        generic_exception_base(ExceptionID             in_exception_id,
                                const ExceptionMessage& in_exception_msg,
                                std::source_location    in_exception_location = std::source_location::current()
                               )
@@ -174,7 +174,7 @@ class general_exception_base<DebugBuildTag>
                                 exception_message{limit_exception_message(in_exception_msg)},
                                 exception_location{in_exception_location} {}
 
-        general_exception_base(ExceptionID                in_exception_id,
+        generic_exception_base(ExceptionID                in_exception_id,
                                const ExceptionMessageView in_exception_msg,
                                std::source_location       in_exception_location = std::source_location::current()
                               )
@@ -207,25 +207,25 @@ class general_exception_base<DebugBuildTag>
                                    }
 };
 
-namespace general_exception
+namespace generic_exception
 {
-    class general_exception : public general_exception_base<BuildTag>
+    class generic_exception : public generic_exception_base<BuildTag>
     {
-        using Base = general_exception_base<BuildTag>;
+        using Base = generic_exception_base<BuildTag>;
 
         public:
-            general_exception() = default;
+            generic_exception() = default;
 
-            general_exception(ExceptionID in_exception_id)
+            generic_exception(ExceptionID in_exception_id)
                              : Base{in_exception_id} {}
 
-            general_exception(const ExceptionMessage& in_exception_msg)
+            generic_exception(const ExceptionMessage& in_exception_msg)
                              : Base{in_exception_msg} {}
 
-             general_exception(const ExceptionMessageView in_exception_msg)
+             generic_exception(const ExceptionMessageView in_exception_msg)
                               : Base{in_exception_msg} {}
 
-             general_exception(ExceptionID                in_exception_id,
+             generic_exception(ExceptionID                in_exception_id,
                                const ExceptionMessageView in_exception_msg
                               )
                               : Base{in_exception_id,
@@ -233,14 +233,14 @@ namespace general_exception
                                     } {}
 
 #ifndef RELEASE_BUILD
-             general_exception(ExceptionMessageView in_exception_msg,
+             generic_exception(ExceptionMessageView in_exception_msg,
                                std::source_location in_exception_location
                               )
                               : Base{in_exception_msg,
                                      in_exception_location
                                     } {}
 
-             general_exception(ExceptionID          in_exception_id,
+             generic_exception(ExceptionID          in_exception_id,
                                ExceptionMessageView in_exception_msg,
                                std::source_location in_exception_location
                               )
@@ -256,6 +256,6 @@ namespace general_exception
              using Base::message;
     };
 
-    using GENERAL_EXCEPTION_EXPECTED_VOID_RETURN    =   std::expected<void,general_exception>;
+    using GENERIC_EXCEPTION_EXPECTED_VOID_RETURN    =   std::expected<void,generic_exception>;
 }
 
