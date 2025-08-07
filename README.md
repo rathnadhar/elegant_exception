@@ -47,6 +47,19 @@ int main()
 include/
 └── elegant_exception/
     └── elegant_exception.h
+    
+## 🧪 Build Instructions
+
+## 🔧 Configure with Ninja
+
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+## 🛠 Build
+cmake --build build
+
+## 📦 Install
+sudo cmake --install build
+
 
 ## 🧠 Philosophy
 Minimal, expressive, and modern C++—designed for clarity and composability.
