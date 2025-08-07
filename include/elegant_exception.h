@@ -1,7 +1,7 @@
 //
 //                   Shree Matraye Namaha
 //                   --------------------
-// generic_exception - C++ Generic Exception Class Library
+// elegant_exception - C++ Generic Exception Class Library
 //
 // Copyright (c) 2025 Rathnadhar K V (Rathnadhar Research RR-->)
 //
@@ -18,7 +18,6 @@
 #include <string_view>
 #include <limits>
 #include <format>
-#include <expected>
 
 using ExceptionID           = u_int64_t;
 using ExceptionMessage      = std::string;
@@ -36,37 +35,36 @@ inline static constexpr std::size_t max_exception_message_size = 256;
 struct DebugBuildTag {};
 struct ReleaseBuildTag {};
 
-#ifdef RELEASE_BUILD
-using BuildTag = ReleaseBuildTag;
-#define NO_SOURCE_LOCATION
-#else
-
+#ifndef NDEBUG // Debug builds
 #include <source_location>
-using ExceptionLocation     = std::source_location;
+   using BuildTag = DebugBuildTag;
+   using ExceptionLocation     = std::source_location;
+#else          //Release builds
+   using BuildTag = ReleaseBuildTag;
+#endif
 
-using BuildTag = DebugBuildTag;
-
+#ifndef NDEBUG 
 //create a custom formatter for debug location information.
-template<>
-struct std::formatter<std::source_location, char>
+namespace std
 {
-    constexpr auto parse(std::format_parse_context& ctx)
-    {
-        return ctx.begin();
-    }
-
-    auto format(const std::source_location& loc, std::format_context& ctx) const
-    {
-        static constexpr std::string_view location_format_template =  "file name: {}, line: {}, function name: {}";
-
-        return std::format_to(ctx.out(),location_format_template,
-                              loc.file_name(),
-                              loc.line(),
-                              loc.function_name()
-                             );
-    }
-};
-#endif //of Debug Build
+   template<>
+   struct formatter<std::source_location, char>
+   {
+      constexpr auto parse(std::format_parse_context& ctx)
+                     {
+                         return ctx.begin();
+                     }
+      auto format(const std::source_location& loc, std::format_context& ctx) const
+      {
+         return format_to(ctx.out(), "file name: {}, function name: {}, line: {}",
+                          loc.file_name(),
+                          loc.function_name(),
+                          loc.line()
+                         );
+      }
+   };
+}
+#endif
 
 //Exception message will be limited to max_exception_message_size ...
 inline static auto limit_exception_message = [](const std::string_view in_exception_message_view) -> std::string
@@ -78,122 +76,125 @@ inline static auto limit_exception_message = [](const std::string_view in_except
 
 //Defining the class template so as to remove the location information during the release build
 template<typename Tag>
-class generic_exception_base;
+class elegant_exception_base;
 
 template<>
-class generic_exception_base<ReleaseBuildTag>
+class elegant_exception_base<ReleaseBuildTag>
 {
-    protected:
-        inline static constexpr std::string_view format_template = "Exception: error_code: {}, error_message: {}";
+   protected:
 
-        ExceptionID      exception_id{std::numeric_limits<ExceptionID>::max()};
-        ExceptionMessage exception_message{};
+      inline static constexpr std::string_view format_template = "Exception: error_code: {}, error_message: {}";
 
-    public:
-        generic_exception_base() = default;
+      ExceptionID      exception_id{std::numeric_limits<ExceptionID>::max()};
+      ExceptionMessage exception_message{};
 
-        generic_exception_base(ExceptionID in_exception_id)
-                               : exception_id{in_exception_id} {}
+   public:
 
-        generic_exception_base(const ExceptionMessage& in_exception_msg)
-                              : exception_message{limit_exception_message(in_exception_msg)} {}
+      elegant_exception_base() = default;
 
-        generic_exception_base(ExceptionMessageView in_exception_msg)
-                              : exception_message{limit_exception_message(in_exception_msg)} {}
+      elegant_exception_base(ExceptionID in_exception_id)
+                             : exception_id{in_exception_id} {}
 
-        generic_exception_base(ExceptionID             in_exception_id,
-                               const ExceptionMessage& in_exception_msg
-                              )
-                              : exception_id{in_exception_id},
+      elegant_exception_base(const ExceptionMessage& in_exception_msg)
+                             : exception_message{limit_exception_message(in_exception_msg)} {}
+
+      elegant_exception_base(ExceptionMessageView in_exception_msg)
+                             : exception_message{limit_exception_message(in_exception_msg)} {}
+
+      elegant_exception_base(ExceptionID             in_exception_id,
+                             const ExceptionMessage& in_exception_msg
+                            )
+                            : exception_id{in_exception_id},
                               exception_message{limit_exception_message(in_exception_msg)} {}
 
-        generic_exception_base(ExceptionID          in_exception_id,
-                               ExceptionMessageView in_exception_msg
-                              )
-                              : exception_id{in_exception_id},
+      elegant_exception_base(ExceptionID          in_exception_id,
+                             ExceptionMessageView in_exception_msg
+                            )
+                            : exception_id{in_exception_id},
                               exception_message{limit_exception_message(in_exception_msg)} {}
 
-        [[nodiscard]] ExceptionMessage what() const noexcept
-                                       {
-                                           return std::format(format_template,
-                                                              this->exception_id,
-                                                              this->exception_message
-                                                             );
-                                       }
+      [[nodiscard]] ExceptionMessage what() const noexcept
+                                     {
+                                       return std::format(format_template,
+                                                          this->exception_id,
+                                                          this->exception_message
+                                                          );
+                                     }
 
-        [[nodiscard]] ExceptionID id() const noexcept
-                                  {
-                                      return this->exception_id;
-                                  }
+      [[nodiscard]] ExceptionID id() const noexcept
+                                {
+                                    return this->exception_id;
+                                }
 
-        [[nodiscard]] ExceptionMessageView message() const noexcept
-                                           {
-                                               return this->exception_message;
-                                           }
+      [[nodiscard]] ExceptionMessageView message() const noexcept
+                                         {
+                                            return this->exception_message;
+                                         }
 };
 
 //Exception for Debug build, this has error location information.
 template<>
-class generic_exception_base<DebugBuildTag>
+class elegant_exception_base<DebugBuildTag>
 {
-    protected:
-        inline static constexpr std::string_view format_template   = "Exception: error_code: {}, error_message: {}, {}";
-        inline static constexpr std::string_view loc_format_string = "{}";
+   protected:
 
-        ExceptionID       exception_id{std::numeric_limits<ExceptionID>::max()};
-        ExceptionMessage  exception_message{};
-        ExceptionLocation exception_location;
+      inline static constexpr std::string_view format_template   = "Exception: error_code: {}, error_message: {}, {}";
+      inline static constexpr std::string_view loc_format_string = "{}";
 
-    public:
-        generic_exception_base(std::source_location in_exception_location = std::source_location::current())
-                              : exception_location{in_exception_location} {}
+      ExceptionID       exception_id{std::numeric_limits<ExceptionID>::max()};
+      ExceptionMessage  exception_message{};
+      ExceptionLocation exception_location;
 
-        generic_exception_base(ExceptionID          in_exception_id,
-                               std::source_location in_exception_location = std::source_location::current()
-                              )
-                              : exception_id{in_exception_id},
-                                exception_location{in_exception_location} {}
+   public:
+      elegant_exception_base(std::source_location in_exception_location = std::source_location::current())
+                             : exception_location{in_exception_location} {}
 
-        generic_exception_base(const ExceptionMessage& in_exception_msg,
-                               std::source_location    in_exception_location = std::source_location::current()
-                              )
-                              : exception_message{limit_exception_message(in_exception_msg)},
-                                exception_location{in_exception_location} {}
+      elegant_exception_base(ExceptionID          in_exception_id,
+                             std::source_location in_exception_location = std::source_location::current()
+                             )
+                             : exception_id{in_exception_id},
+                               exception_location{in_exception_location} {}
 
-        generic_exception_base(const ExceptionMessageView in_exception_msg,
-                               std::source_location       in_exception_location = std::source_location::current()
-                              )
-                              : exception_message{limit_exception_message(in_exception_msg)},
-                                exception_location{in_exception_location} {}
+      elegant_exception_base(const ExceptionMessage& in_exception_msg,
+                             std::source_location    in_exception_location = std::source_location::current()
+                            )
+                            : exception_message{limit_exception_message(in_exception_msg)},
+                              exception_location{in_exception_location} {}
 
-        generic_exception_base(ExceptionID             in_exception_id,
-                               const ExceptionMessage& in_exception_msg,
-                               std::source_location    in_exception_location = std::source_location::current()
-                              )
-                              : exception_id{in_exception_id},
-                                exception_message{limit_exception_message(in_exception_msg)},
-                                exception_location{in_exception_location} {}
+      elegant_exception_base(const ExceptionMessageView in_exception_msg,
+                             std::source_location       in_exception_location = std::source_location::current()
+                            )
+                            : exception_message{limit_exception_message(in_exception_msg)},
+                              exception_location{in_exception_location} {}
 
-        generic_exception_base(ExceptionID                in_exception_id,
-                               const ExceptionMessageView in_exception_msg,
-                               std::source_location       in_exception_location = std::source_location::current()
-                              )
-                              : exception_id{in_exception_id},
-                                exception_message{limit_exception_message(in_exception_msg)},
-                                exception_location{in_exception_location} {}
+      elegant_exception_base(ExceptionID             in_exception_id,
+                             const ExceptionMessage& in_exception_msg,
+                             std::source_location    in_exception_location = std::source_location::current()
+                            )
+                            : exception_id{in_exception_id},
+                              exception_message{limit_exception_message(in_exception_msg)},
+                              exception_location{in_exception_location} {}
+
+      elegant_exception_base(ExceptionID                in_exception_id,
+                             const ExceptionMessageView in_exception_msg,
+                             std::source_location       in_exception_location = std::source_location::current()
+                            )
+                            : exception_id{in_exception_id},
+                              exception_message{limit_exception_message(in_exception_msg)},
+                              exception_location{in_exception_location} {}
 
     [[nodiscard]] ExceptionMessage what() const noexcept
                                    {
                                        return std::format(format_template,
                                                           this->exception_id,
-                                                          exception_message,
-                                                          std::format(loc_format_string, exception_location)
+                                                          this->exception_message,
+                                                          this->exception_location
                                                          );
                                    }
 
     [[nodiscard]] ExceptionID id() const noexcept
                               {
-                                  return this->exception_id;
+                                 return this->exception_id;
                               }
 
    [[nodiscard]] ExceptionMessageView message() const noexcept
@@ -207,55 +208,56 @@ class generic_exception_base<DebugBuildTag>
                                    }
 };
 
-namespace generic_exception
+namespace elegant_exception
 {
-    class generic_exception : public generic_exception_base<BuildTag>
-    {
-        using Base = generic_exception_base<BuildTag>;
+   class elegant_exception : public elegant_exception_base<BuildTag>
+   {
+      using Base = elegant_exception_base<BuildTag>;
 
-        public:
-            generic_exception() = default;
+      public:
+         elegant_exception() = default;
 
-            generic_exception(ExceptionID in_exception_id)
-                             : Base{in_exception_id} {}
+         elegant_exception(ExceptionID in_exception_id)
+                          : Base{in_exception_id} {}
 
-            generic_exception(const ExceptionMessage& in_exception_msg)
-                             : Base{in_exception_msg} {}
+         elegant_exception(const ExceptionMessage& in_exception_msg)
+                           : Base{in_exception_msg} {}
 
-             generic_exception(const ExceptionMessageView in_exception_msg)
-                              : Base{in_exception_msg} {}
+         elegant_exception(const ExceptionMessageView in_exception_msg)
+                           : Base{in_exception_msg} {}
 
-             generic_exception(ExceptionID                in_exception_id,
-                               const ExceptionMessageView in_exception_msg
-                              )
-                              : Base{in_exception_id,
-                                     in_exception_msg
-                                    } {}
+         elegant_exception(ExceptionID                in_exception_id,
+                           const ExceptionMessageView in_exception_msg
+                          )
+                          : Base{in_exception_id,
+                                 in_exception_msg
+                                } {}
+#ifndef NDEBUG
 
-#ifndef RELEASE_BUILD
-             generic_exception(ExceptionMessageView in_exception_msg,
-                               std::source_location in_exception_location
-                              )
-                              : Base{in_exception_msg,
-                                     in_exception_location
-                                    } {}
+         elegant_exception(ExceptionMessageView in_exception_msg,
+                           std::source_location in_exception_location
+                           )
+                           : Base{in_exception_msg,
+                                  in_exception_location
+                                 } {}
 
-             generic_exception(ExceptionID          in_exception_id,
-                               ExceptionMessageView in_exception_msg,
-                               std::source_location in_exception_location
-                              )
-                              : Base{in_exception_id,
-                                     in_exception_msg,
-                                     in_exception_location
-                                    } {}
-             using Base::location;
+         elegant_exception(ExceptionID          in_exception_id,
+                           ExceptionMessageView in_exception_msg,
+                           std::source_location in_exception_location
+                          )
+                          : Base{in_exception_id,
+                                 in_exception_msg,
+                                 in_exception_location
+                                } {}
+
+         using Base::location;
 #endif
 
-             using Base::what;
-             using Base::id;
-             using Base::message;
-    };
+         using Base::what;
+         using Base::id;
+         using Base::message;
+   };
 
-    using GENERIC_EXCEPTION_EXPECTED_VOID_RETURN    =   std::expected<void,generic_exception>;
+   using ELEGANT_EXCEPTION_EXPECTED_VOID_RETURN =  std::expected<void,elegant_exception>;
 }
 
