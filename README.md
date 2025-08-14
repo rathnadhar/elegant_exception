@@ -96,5 +96,15 @@ This project is licensed under the [MIT License](https://mit-license.org/) — a
 Passionate about modern C++ design, monadic error handling, and building elegant, dependency-light libraries.  
 GitHub: [@rathnadhar](https://github.com/rathnadhar)
 
+## 📜 Changelog
 
+## [v2] - 2025-08-14
+
+### Added
+1. `raise()` — symbolic alias for exception creation with source location fidelity
+2. `make_exception` — build-aware helper adapting to debug/release modes
+
+### Updated
+1. README.md to reflect new invocation patterns and philosophy
+2. LICENSE clarified for reuse and attribution
 
