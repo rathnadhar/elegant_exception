@@ -4,11 +4,13 @@ A lightweight and expressive C++ exception framework designed for modern error h
 Supports structured propagation, source location tracking, and monadic integration via `std::expected`.
 
 ## 📦 Features
-- C++23 or above compilation
-- Header-only design
-- `elegant_exception` with error number, message and source location
-- Seamless integration with `std::expected`
-- Type-safe error propagation
+1. C++23 or above compilation
+2. Header-only design
+3. `elegant_exception` with error number, message and source location
+4. Seamless integration with `std::expected`
+5. Type-safe error propagation
+6. `raise()` — a symbolic alias for exception creation, with source location fidelity
+7. `make_exception` — meta-aware helper adapting to debug/release builds
 
 ## 🚀 Quick Start
 
@@ -40,6 +42,23 @@ int main()
         return std::unexpected{eexp};
     });
 }
+
+With raise()
+
+#include <elegant_exception/elegant_exception.h>
+#include <iostream>
+
+using elegant_exception::raise;
+
+expected<int, elegant_exception> divide(int a, int b) 
+{
+    if (b == 0)
+    {
+        return unexpected{raise(1001, "Division by zero")};
+    }
+    
+    return a / b;
+}
 ```
 
 
@@ -62,7 +81,9 @@ sudo cmake --install build
 
 
 ## 🧠 Philosophy
-Minimal, expressive, and modern C++—designed for clarity and composability.
+1. Minimal, expressive, and modern C++—designed for clarity and composability.
+2. Exception creation is ritualized via `raise()`, reflecting intentional design.
+3. Debug builds retain source location for auditability; release builds remain lean.
 
 ## 📜 License
 MIT

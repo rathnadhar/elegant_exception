@@ -3,7 +3,8 @@
 //                   --------------------
 // elegant_exception - C++ Generic Exception Class Library
 //
-// Copyright (c) 2025 Rathnadhar K V (Rathnadhar Research RR-->)
+// Copyright (c) 2025 Rathnadhar K V
+// (Rathnadhar Research RR➔)
 //
 // Licensed under the MIT License. You may obtain a copy of the License at:
 // https://opensource.org/licenses/MIT
@@ -259,5 +260,44 @@ namespace elegant_exception
    };
 
    using ELEGANT_EXCEPTION_EXPECTED_VOID_RETURN =  std::expected<void,elegant_exception>;
+
+
+#ifdef NDEBUG
+   inline auto make_exception = [](auto in_elegant_totp_error_id,
+                                   std::string_view      in_error_message,
+                  [[maybe_unused]] std::source_location  = std::source_location::current()
+                                  ) -> elegant_exception::elegant_exception
+               {
+                  return elegant_exception::elegant_exception{static_cast<ExceptionID>(in_elegant_totp_error_id),
+                                                              in_error_message
+                                                             };
+               };
+#else
+   inline auto make_exception = [](auto in_elegant_totp_error_id,
+                                   std::string_view      in_error_message,
+                                   std::source_location  in_location = std::source_location::current()
+                                  ) -> elegant_exception::elegant_exception
+               {
+                  return elegant_exception::elegant_exception{static_cast<ExceptionID>(in_elegant_totp_error_id),
+                                                              in_error_message,
+                                                              in_location
+                                                             };
+               };
+#endif
+
+   // 🌟 Symbolic alias
+   inline auto raise(auto in_elegant_totp_error_id,
+                     std::string_view in_error_message,
+                     std::source_location in_location = std::source_location::current()
+                    ) -> elegant_exception
+   {
+       return make_exception(in_elegant_totp_error_id,
+                             in_error_message,
+                             in_location
+                            );
+   }
 }
+
+
+
 
