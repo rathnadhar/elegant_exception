@@ -268,9 +268,9 @@ namespace elegant_exception
                   [[maybe_unused]] std::source_location  = std::source_location::current()
                                   ) -> elegant_exception
                {
-                  return elegant_exception::elegant_exception{static_cast<ExceptionID>(in_elegant_totp_error_id),
-                                                              in_error_message
-                                                             };
+                  return elegant_exception(static_cast<ExceptionID>(in_elegant_totp_error_id),
+                                           in_error_message
+                                          );
                };
 #else
    inline auto make_exception = [](auto in_elegant_totp_error_id,
@@ -278,10 +278,10 @@ namespace elegant_exception
                                    std::source_location  in_location = std::source_location::current()
                                   ) -> elegant_exception
                {
-                  return elegant_exception::elegant_exception{static_cast<ExceptionID>(in_elegant_totp_error_id),
-                                                              in_error_message,
-                                                              in_location
-                                                             };
+                  return elegant_exception(static_cast<ExceptionID>(in_elegant_totp_error_id),
+                                           in_error_message,
+                                           in_location
+                                          );
                };
 #endif
 
