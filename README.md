@@ -98,8 +98,16 @@ GitHub: [@rathnadhar](https://github.com/rathnadhar)
 
 ## 📜 Changelog
 
-## [v2] - 2025-08-14
+<details>
+<summary>Click to expand</summary>
 
+### v3 — 2025‑08‑23
+1. Fixed compilation errors.
+2. Added .gitignore
+3. 🔐 All artifacts now signed with GPG key '5A4A40D85A0C1D11' and provenance verified.
+
+
+### v2 — 2025‑06‑14
 ### Added
 1. `raise()` — symbolic alias for exception creation with source location fidelity
 2. `make_exception` — build-aware helper adapting to debug/release modes
@@ -108,3 +116,7 @@ GitHub: [@rathnadhar](https://github.com/rathnadhar)
 1. README.md to reflect new invocation patterns and philosophy
 2. LICENSE clarified for reuse and attribution
 
+### v1 — 2025‑04‑01
+1. Initial public release of elegant_exception. A new C++23 paradignm for universal exception engine.
+
+</details>
