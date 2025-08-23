@@ -266,7 +266,7 @@ namespace elegant_exception
    inline auto make_exception = [](auto in_elegant_totp_error_id,
                                    std::string_view      in_error_message,
                   [[maybe_unused]] std::source_location  = std::source_location::current()
-                                  ) -> elegant_exception::elegant_exception
+                                  ) -> elegant_exception
                {
                   return elegant_exception::elegant_exception{static_cast<ExceptionID>(in_elegant_totp_error_id),
                                                               in_error_message
